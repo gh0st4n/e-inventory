@@ -1,7 +1,7 @@
 <?php
 // petugas/login/login.php
 
-session_start();
+require_once __DIR__ . '/session.php';
 
 // Kalau sudah login sebagai petugas, langsung ke dashboard
 if (isset($_SESSION['user_id']) && ($_SESSION['role'] ?? '') === 'gudang') {

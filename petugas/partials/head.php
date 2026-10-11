@@ -10,4 +10,10 @@
     <link rel="stylesheet" crossorigin href="template/src/assets/css/main.css">
     <!-- Font ikon Tabler (harus SETELAH main.css supaya menimpa path font yang rusak di main.css) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.35.0/dist/tabler-icons.min.css"> 
+    <!-- Footer selalu menempel di bagian bawah layar, walau isi halaman pendek -->
+    <style>
+      #content { min-height: 100vh; display: flex; flex-direction: column; }
+      #content > .container-fluid { flex: 1 0 auto; display: flex; flex-direction: column; }
+      #content > .container-fluid > .row:last-child { margin-top: auto; }
+    </style>
 </head>

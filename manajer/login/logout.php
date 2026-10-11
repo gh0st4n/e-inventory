@@ -1,7 +1,7 @@
 <?php
 // manajer/login/logout.php
 
-session_start();
+require_once __DIR__ . '/session.php';
 
 // Kosongkan semua data session
 $_SESSION = [];

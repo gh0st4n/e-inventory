@@ -70,6 +70,11 @@
             include 'pages/kebutuhan-bahan-baku/update.php';
             break;
 
+        // Akun Saya (ganti password)
+        case 'akun':
+            include 'pages/akun/akun.php';
+            break;
+
         default:
             include 'pages/dashboard.php';
             break;

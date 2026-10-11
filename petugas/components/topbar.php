@@ -24,6 +24,9 @@
               <span class="badge bg-primary-subtle text-primary mt-2">Petugas Gudang</span>
             </div>
             <div class="p-3 small">
+              <a href="index.php?page=akun" class="text-reset d-flex align-items-center gap-2 mb-3">
+                <i class="ti ti-user-circle"></i><span>Akun Saya</span>
+              </a>
               <a href="login/logout.php" class="link-danger d-flex align-items-center gap-2"
                 onclick="return confirm('Yakin ingin logout?')">
                 <i class="ti ti-logout"></i><span>Logout</span>

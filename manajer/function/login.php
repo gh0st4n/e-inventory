@@ -3,7 +3,7 @@
 
 include_once __DIR__ . '/../database/connection.php';
 
-session_start();
+require_once __DIR__ . '/../login/session.php';
 
 $koneksi = (new Database())->conn;
 
@@ -48,6 +48,10 @@ if ($aksi === 'masuk' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['nama']    = $pengguna['nama'];
     $_SESSION['email']   = $pengguna['email'];
     $_SESSION['role']    = $pengguna['role'];
+    $_SESSION['login_pada']         = time();
+    $_SESSION['id_dibuat_pada']     = time();
+    $_SESSION['aktivitas_terakhir'] = time();
+    $_SESSION['ua_hash']            = hash('sha256', $_SERVER['HTTP_USER_AGENT'] ?? '');
 
     header("Location: {$base}index.php?page=dashboard");
     exit;
