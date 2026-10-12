@@ -61,10 +61,18 @@ if ($supplier_id) {
     $daftar_po = $ambil_po->get_result();
 }
 
-// ---------- DAFTAR BARANG & HARGA ----------
-$daftar_barang = $koneksi->query(
-    "SELECT id, nama_barang, harga_satuan FROM products ORDER BY nama_barang ASC"
-);
+// ---------- DAFTAR BARANG & HARGA (hanya milik supplier yang sedang login) ----------
+if ($supplier_id) {
+    $ambil_barang = $koneksi->prepare(
+        "SELECT id, nama_barang, harga_satuan FROM products WHERE supplier_id = ? ORDER BY nama_barang ASC"
+    );
+    $ambil_barang->bind_param('i', $supplier_id);
+    $ambil_barang->execute();
+    $daftar_barang = $ambil_barang->get_result();
+} else {
+    // Akun belum terhubung ke data supplier: tampilkan daftar kosong
+    $daftar_barang = $koneksi->query("SELECT id, nama_barang, harga_satuan FROM products WHERE 1 = 0");
+}
 
 // ---------- PESAN SETELAH UBAH HARGA ----------
 $daftar_pesan = [

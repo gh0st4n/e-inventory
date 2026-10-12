@@ -16,4 +16,9 @@
       #content > .container-fluid { flex: 1 0 auto; display: flex; flex-direction: column; }
       #content > .container-fluid > .row:last-child { margin-top: auto; }
     </style>
+    <!-- Sembunyikan scrollbar di sisi kanan halaman (halaman tetap bisa di-scroll pakai mouse / keyboard / sentuh) -->
+    <style>
+      html, body { scrollbar-width: none; -ms-overflow-style: none; }
+      html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; width: 0; height: 0; }
+    </style>
 </head>

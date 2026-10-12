@@ -87,9 +87,6 @@ function linkHalaman($nomor_halaman, $kata_cari)
               <h1 class="fs-3 mb-1">Stok &amp; Opname</h1>
               <p class="mb-0">Pantau stok barang dan catat hasil opname stok</p>
             </div>
-            <div>
-              <a href="index.php?page=tambah-opname" class="btn btn-primary">Catat Opname</a>
-            </div>
           </div>
         </div>
       </div>
@@ -107,16 +104,14 @@ function linkHalaman($nomor_halaman, $kata_cari)
                 <input type="text" name="cari" class="form-control" placeholder="Cari nama barang..." value="<?= htmlspecialchars($kata_cari) ?>" style="max-width: 250px;">
                 <button type="submit" class="btn btn-outline-secondary"><i class="ti ti-search"></i> Cari</button>
               </div>
-              <div class="d-flex gap-2">
-                <button type="button" class="btn btn-outline-secondary">
-                  <i class="ti ti-file-excel"></i> Excel
-                </button>
-                <button type="button" class="btn btn-outline-secondary">
-                  <i class="ti ti-file-type-pdf"></i> PDF
-                </button>
-              </div>
             </form>
           </div>
+          <?php if ($kata_cari !== ''): ?>
+            <div class="alert alert-info d-flex justify-content-between align-items-center">
+              <span>Hasil pencarian untuk <strong>"<?= htmlspecialchars($kata_cari) ?>"</strong>: <?= $total_data ?> data ditemukan.</span>
+              <a href="index.php?page=stok" class="btn btn-sm btn-outline-secondary">Hapus pencarian</a>
+            </div>
+          <?php endif; ?>
           <div class="card table-responsive mb-4">
             <table class="table mb-0 text-nowrap table-hover">
               <thead class="table-light border-light">
