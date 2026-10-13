@@ -3,80 +3,65 @@
 // Baris ??= hanya memberi nilai awal supaya editor tidak menandai "undefined variable";
 // kalau variabelnya sudah ada, nilainya tidak berubah.
 $jumlah_po         ??= ['diajukan' => 0, 'disetujui' => 0, 'ditolak' => 0, 'selesai' => 0];
+$filter_status     ??= '';
 
 /**
  * @var array<string,int> $jumlah_po
+ * @var string $filter_status
  */
+
+// Tombol berwarna oranye hanya muncul di kartu yang sedang dipilih (sesuai ?status= di alamat)
+
+$kartu_status = [
+    [
+        'status'     => 'diajukan',
+        'judul'      => 'PO Diajukan',
+        'deskripsi'  => 'PO baru dari gudang yang menunggu keputusan manajer',
+        'keterangan' => 'Menunggu keputusan manajer',
+    ],
+    [
+        'status'     => 'disetujui',
+        'judul'      => 'PO Disetujui',
+        'deskripsi'  => 'PO sudah disetujui manajer. Siapkan dan kirim barang ke gudang',
+        'keterangan' => 'Menunggu barang dikirim dan dicatat gudang',
+    ],
+    [
+        'status'     => 'selesai',
+        'judul'      => 'PO Selesai',
+        'deskripsi'  => 'Barang sudah diterima dan dicatat gudang, PO ditutup manajer',
+        'keterangan' => 'PO sudah ditutup',
+    ],
+    [
+        'status'     => 'ditolak',
+        'judul'      => 'PO Ditolak',
+        'deskripsi'  => 'PO ditolak manajer, tidak perlu dipenuhi',
+        'keterangan' => 'Tidak perlu dikirim',
+    ],
+];
 ?>
 <section id="status-po" class="pricing section light-background">
 
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
         <h2>Status PO</h2>
-        <p>Tahapan Purchase Order dari pengajuan gudang sampai barang diterima</p>
+        <p>Pantau jumlah Purchase Order Anda berdasarkan statusnya</p>
       </div><!-- End Section Title -->
 
       <div class="container">
 
         <div class="row gy-4">
 
-          <div class="col-lg-4" data-aos="zoom-in" data-aos-delay="100">
-            <div class="pricing-item">
-              <h3>PO Diajukan</h3>
-              <p class="description">PO yang baru dibuat gudang dan menunggu verifikasi manajer</p>
-              <h4><?= $jumlah_po['diajukan'] ?><span> PO</span></h4>
-              <a href="/?status=diajukan#riwayat-po" class="cta-btn">Lihat Detail</a>
-              <p class="text-center small">Menunggu verifikasi</p>
-              <ul>
-                <li><i class="bi bi-check"></i> <span>Gudang mengajukan kebutuhan bahan baku</span></li>
-                <li><i class="bi bi-check"></i> <span>PO tercatat di sistem</span></li>
-                <li><i class="bi bi-check"></i> <span>Supplier melihat status PO</span></li>
-                <li class="na"><i class="bi bi-x"></i> <span>Manajer memverifikasi pengajuan</span></li>
-                <li class="na"><i class="bi bi-x"></i> <span>Manajer menyetujui PO</span></li>
-                <li class="na"><i class="bi bi-x"></i> <span>Supplier mengirim barang</span></li>
-                <li class="na"><i class="bi bi-x"></i> <span>Gudang mencatat barang masuk</span></li>
-              </ul>
+          <?php foreach ($kartu_status as $indeks => $kartu): $jumlah = $jumlah_po[$kartu['status']] ?? 0; ?>
+          <div class="col-xl-3 col-lg-6" data-aos="zoom-in" data-aos-delay="<?= ($indeks + 1) * 100 ?>">
+            <div class="pricing-item<?= $kartu['status'] === $filter_status ? ' featured' : '' ?>">
+              <h3><?= $kartu['judul'] ?></h3>
+              <p class="description"><?= $kartu['deskripsi'] ?></p>
+              <h4><?= $jumlah ?><span> PO</span></h4>
+              <a href="/?status=<?= $kartu['status'] ?>#riwayat-po" class="cta-btn">Lihat Daftar PO</a>
+              <p class="text-center small mb-0"><?= $kartu['keterangan'] ?></p>
             </div>
           </div><!-- End Pricing Item -->
-
-          <div class="col-lg-4" data-aos="zoom-in" data-aos-delay="200">
-            <div class="pricing-item featured">
-              <p class="popular">Perlu Dikirim</p>
-              <h3>PO Disetujui</h3>
-              <p class="description">PO yang sudah disetujui manajer dan siap dipenuhi supplier</p>
-              <h4><?= $jumlah_po['disetujui'] ?><span> PO</span></h4>
-              <a href="/?status=disetujui#riwayat-po" class="cta-btn">Lihat Detail</a>
-              <p class="text-center small">Siap dikirim</p>
-              <ul>
-                <li><i class="bi bi-check"></i> <span>Gudang mengajukan kebutuhan bahan baku</span></li>
-                <li><i class="bi bi-check"></i> <span>PO tercatat di sistem</span></li>
-                <li><i class="bi bi-check"></i> <span>Supplier melihat status PO</span></li>
-                <li><i class="bi bi-check"></i> <span>Manajer memverifikasi pengajuan</span></li>
-                <li><i class="bi bi-check"></i> <span>Manajer menyetujui PO</span></li>
-                <li><i class="bi bi-check"></i> <span>Supplier mengirim barang</span></li>
-                <li class="na"><i class="bi bi-x"></i> <span>Gudang mencatat barang masuk</span></li>
-              </ul>
-            </div>
-          </div><!-- End Pricing Item -->
-
-          <div class="col-lg-4" data-aos="zoom-in" data-aos-delay="300">
-            <div class="pricing-item">
-              <h3>PO Selesai</h3>
-              <p class="description">PO yang barangnya sudah diterima dan dicatat oleh gudang</p>
-              <h4><?= $jumlah_po['selesai'] ?><span> PO</span></h4>
-              <a href="/?status=selesai#riwayat-po" class="cta-btn">Lihat Detail</a>
-              <p class="text-center small">Proses selesai</p>
-              <ul>
-                <li><i class="bi bi-check"></i> <span>Gudang mengajukan kebutuhan bahan baku</span></li>
-                <li><i class="bi bi-check"></i> <span>PO tercatat di sistem</span></li>
-                <li><i class="bi bi-check"></i> <span>Supplier melihat status PO</span></li>
-                <li><i class="bi bi-check"></i> <span>Manajer memverifikasi pengajuan</span></li>
-                <li><i class="bi bi-check"></i> <span>Manajer menyetujui PO</span></li>
-                <li><i class="bi bi-check"></i> <span>Supplier mengirim barang</span></li>
-                <li><i class="bi bi-check"></i> <span>Gudang mencatat barang masuk</span></li>
-              </ul>
-            </div>
-          </div><!-- End Pricing Item -->
+          <?php endforeach; ?>
 
         </div>
 
