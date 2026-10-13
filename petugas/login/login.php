@@ -25,7 +25,7 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? null;
   <meta charset="UTF-8" />
   <title>Login Petugas Gudang || E-INVENTORY</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/png" sizes="32x32" href="../template/src/assets/images/favicon_io/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="../template/src/assets/images/favicon_io/favicon-32x32.png?v=hijau">
   <link rel="stylesheet" crossorigin href="../template/src/assets/css/main.css">
   <!-- Font ikon Tabler (harus SETELAH main.css) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.35.0/dist/tabler-icons.min.css">

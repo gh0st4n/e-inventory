@@ -37,8 +37,7 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? null;
   <div class="card" style="max-width:420px; width:100%;">
     <div class="card-body p-5">
       <div class="text-center mb-3">
-        <a href="login.php" class="mb-4 d-inline-block"><img src="../template/src/assets/images/logo-icon.svg" alt="" width="36">
-          <span class="ms-2"> <img src="../template/src/assets/images/logo.svg" alt=""></span>
+        <a href="login.php" class="mb-4 d-inline-block"><img src="../template/src/assets/images/logo-icon.svg" alt="" width="48">
         </a>
         <h1 class="card-title mb-1 h5">Login Manajer Operasional</h1>
         <p class="text-secondary small mb-4">E-Inventory - Manajemen Logistik &amp; Stok Gudang</p>

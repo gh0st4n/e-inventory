@@ -6,8 +6,10 @@
   <meta name="keywords" content="">
 
   <!-- Favicons -->
-  <link href="/supplier/template/assets/img/logo-icon.svg" rel="icon" type="image/svg+xml">
-  <link href="/supplier/template/assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="/supplier/template/assets/img/favicon-32x32.png?v=oranye" rel="icon" type="image/png" sizes="32x32">
+  <link href="/supplier/template/assets/img/favicon-16x16.png?v=oranye" rel="icon" type="image/png" sizes="16x16">
+  <link href="/supplier/template/assets/img/favicon.ico?v=oranye" rel="shortcut icon">
+  <link href="/supplier/template/assets/img/apple-touch-icon.png?v=oranye" rel="apple-touch-icon" sizes="180x180">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
