@@ -78,7 +78,7 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
                   </div>
                   <div class="col-md-3 mb-3">
                     <label for="tanggal" class="form-label">Tanggal Opname</label>
-                    <input type="date" class="form-control" name="tanggal" id="tanggal" value="<?= date('Y-m-d', strtotime($data['tanggal'])) ?>" required>
+                    <input type="date" class="form-control" name="tanggal" id="tanggal" value="<?= date('Y-m-d', strtotime($data['tanggal'])) ?>" required <?= date('Y-m-d', strtotime($data['tanggal'])) < date('Y-m-d') ? 'readonly' : 'min="' . date('Y-m-d') . '"' ?>>
                   </div>
                 </div>
 

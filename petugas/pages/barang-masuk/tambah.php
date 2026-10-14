@@ -75,7 +75,7 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
                   </div>
                   <div class="col-md-6 mb-3">
                     <label for="tanggal" class="form-label">Tanggal Masuk</label>
-                    <input type="date" class="form-control" name="tanggal" id="tanggal" value="<?= date('Y-m-d') ?>" required>
+                    <input type="date" class="form-control" name="tanggal" id="tanggal" value="<?= date('Y-m-d') ?>" min="<?= date('Y-m-d') ?>" required>
                   </div>
                 </div>
 
