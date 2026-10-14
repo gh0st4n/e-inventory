@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $id   = (int) ($_POST['id'] ?? 0);
-$dari = $_POST['dari'] ?? 'daftar';
+$dari = htmlspecialchars($_POST['dari'] ?? 'daftar');
 
 // Tentukan halaman tujuan setelah proses selesai (kembali ke halaman asal tombol)
 function tujuan($base, $dari, $id, $pesan)

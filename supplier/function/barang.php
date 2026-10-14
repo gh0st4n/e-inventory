@@ -19,8 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $supplier_id  = (int) ($_SESSION['supplier_id'] ?? 0);
-$nama_barang  = trim($_POST['nama_barang'] ?? '');
-$harga_satuan = $_POST['harga_satuan'] ?? '';
+$nama_barang  = trim(htmlspecialchars($_POST['nama_barang'] ?? ''));
+$harga_satuan = html_entity_decode(htmlspecialchars($_POST['harga_satuan'] ?? ''));
 
 // 1. Cek isian masuk akal (batas sesuai kolom di database)
 if ($supplier_id <= 0 || $nama_barang === '' || mb_strlen($nama_barang) > 150

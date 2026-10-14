@@ -32,7 +32,7 @@ function hitungStok($koneksi, $product_id, $kecuali_transaksi_id = 0)
 if ($aksi === 'simpan' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $product_id = (int) ($_POST['product_id'] ?? 0);
     $jumlah     = (int) ($_POST['jumlah'] ?? 0);
-    $tanggal    = $_POST['tanggal'] ?? '';
+    $tanggal    = htmlspecialchars($_POST['tanggal'] ?? '');
 
     // Cek isiannya masuk akal
     $tanggal_valid = DateTime::createFromFormat('Y-m-d', $tanggal);
@@ -74,7 +74,7 @@ if ($aksi === 'ubah' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $id         = (int) ($_POST['id'] ?? 0);
     $product_id = (int) ($_POST['product_id'] ?? 0);
     $jumlah     = (int) ($_POST['jumlah'] ?? 0);
-    $tanggal    = $_POST['tanggal'] ?? '';
+    $tanggal    = htmlspecialchars($_POST['tanggal'] ?? '');
 
     // 2. Cek isiannya masuk akal
     $tanggal_valid = DateTime::createFromFormat('Y-m-d', $tanggal);

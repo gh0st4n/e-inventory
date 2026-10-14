@@ -14,7 +14,7 @@ if ($aksi === 'simpan' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $product_id = (int) ($_POST['product_id'] ?? 0);
     $po_id      = ($_POST['po_id'] ?? '') !== '' ? (int) $_POST['po_id'] : null;
     $jumlah     = (int) ($_POST['jumlah'] ?? 0);
-    $tanggal    = $_POST['tanggal'] ?? '';
+    $tanggal    = htmlspecialchars($_POST['tanggal'] ?? '');
 
     // Cek isiannya masuk akal
     $tanggal_valid = DateTime::createFromFormat('Y-m-d', $tanggal);
@@ -57,7 +57,7 @@ if ($aksi === 'ubah' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $product_id = (int) ($_POST['product_id'] ?? 0);
     $po_id      = ($_POST['po_id'] ?? '') !== '' ? (int) $_POST['po_id'] : null;
     $jumlah     = (int) ($_POST['jumlah'] ?? 0);
-    $tanggal    = $_POST['tanggal'] ?? '';
+    $tanggal    = htmlspecialchars($_POST['tanggal'] ?? '');
 
     // 2. Cek isiannya masuk akal
     $tanggal_valid = DateTime::createFromFormat('Y-m-d', $tanggal);

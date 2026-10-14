@@ -35,7 +35,7 @@ function hitungStok($koneksi, $product_id, $kecuali_transaksi_id = 0)
 // Dipakai petugas untuk mengubah batas stok minimal sebuah barang (tabel products).
 if ($aksi === 'minimal' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $product_id   = (int) ($_POST['product_id'] ?? 0);
-    $stok_minimal = $_POST['stok_minimal'] ?? '';
+    $stok_minimal = htmlspecialchars($_POST['stok_minimal'] ?? '');
 
     if ($product_id <= 0 || !ctype_digit((string) $stok_minimal) || (int) $stok_minimal > 1000000) {
         header("Location: $kembali&pesan=minimal_tidak_valid");
@@ -55,7 +55,7 @@ if ($aksi === 'minimal' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($aksi === 'simpan' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $product_id = (int) ($_POST['product_id'] ?? 0);
     $stok_fisik = (int) ($_POST['stok_fisik'] ?? -1);
-    $tanggal    = $_POST['tanggal'] ?? '';
+    $tanggal    = htmlspecialchars($_POST['tanggal'] ?? '');
 
     // Cek isiannya masuk akal
     $tanggal_valid = DateTime::createFromFormat('Y-m-d', $tanggal);
@@ -93,7 +93,7 @@ if ($aksi === 'ubah' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     // 1. Ambil data dari form
     $id         = (int) ($_POST['id'] ?? 0);
     $stok_fisik = (int) ($_POST['stok_fisik'] ?? -1);
-    $tanggal    = $_POST['tanggal'] ?? '';
+    $tanggal    = htmlspecialchars($_POST['tanggal'] ?? '');
 
     // 2. Cek isiannya masuk akal
     $tanggal_valid = DateTime::createFromFormat('Y-m-d', $tanggal);

@@ -13,8 +13,8 @@ $halaman_login = $base . 'login/login.php';
 
 // ---------- MASUK ----------
 if ($aksi === 'masuk' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email    = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
+    $email    = trim(htmlspecialchars($_POST['email'] ?? ''));
+    $password = htmlspecialchars($_POST['password'] ?? '');
 
     // 1. Cek form tidak kosong
     if ($email === '' || $password === '') {

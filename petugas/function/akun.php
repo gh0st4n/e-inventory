@@ -14,9 +14,9 @@ $kembali = '/e-inventory/petugas/index.php?page=akun';
 // ---------- UBAH PASSWORD ----------
 if ($aksi === 'password' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id       = (int) $_SESSION['user_id'];   // selalu akun yang sedang login, bukan dari form
-    $password_lama = $_POST['password_lama'] ?? '';
-    $password_baru = $_POST['password_baru'] ?? '';
-    $konfirmasi    = $_POST['konfirmasi_password'] ?? '';
+    $password_lama = htmlspecialchars($_POST['password_lama'] ?? '');
+    $password_baru = htmlspecialchars($_POST['password_baru'] ?? '');
+    $konfirmasi    = htmlspecialchars($_POST['konfirmasi_password'] ?? '');
 
     // 1. Cek isian masuk akal
     if ($password_lama === '' || $password_baru === '' || $konfirmasi === '') {

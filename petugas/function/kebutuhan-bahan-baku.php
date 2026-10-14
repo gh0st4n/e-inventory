@@ -15,7 +15,7 @@ $kembali = $base . 'kebutuhan-bahan-baku';
 // ---------- TAMBAH ----------
 if ($aksi === 'simpan' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $supplier_id = (int) ($_POST['supplier_id'] ?? 0);
-    $tanggal_po  = $_POST['tanggal_po'] ?? '';
+    $tanggal_po  = htmlspecialchars($_POST['tanggal_po'] ?? '');
 
     // Cek isiannya masuk akal
     $tanggal_valid = DateTime::createFromFormat('Y-m-d', $tanggal_po);
@@ -49,7 +49,7 @@ if ($aksi === 'ubah' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     // 1. Ambil data dari form
     $id          = (int) ($_POST['id'] ?? 0);
     $supplier_id = (int) ($_POST['supplier_id'] ?? 0);
-    $tanggal_po  = $_POST['tanggal_po'] ?? '';
+    $tanggal_po  = htmlspecialchars($_POST['tanggal_po'] ?? '');
 
     // 2. Cek isiannya masuk akal
     $tanggal_valid = DateTime::createFromFormat('Y-m-d', $tanggal_po);

@@ -14,8 +14,8 @@ $halaman_daftar = '/supplier/login/register.php';
 
 // ---------- MASUK ----------
 if ($aksi === 'masuk' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email    = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
+    $email    = trim(htmlspecialchars($_POST['email'] ?? ''));
+    $password = htmlspecialchars($_POST['password'] ?? '');
 
     // 1. Cek form tidak kosong
     if ($email === '' || $password === '') {
@@ -85,12 +85,12 @@ if ($aksi === 'masuk' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // ---------- DAFTAR ----------
 if ($aksi === 'daftar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nama_perusahaan = trim($_POST['nama_perusahaan'] ?? '');
-    $nama            = trim($_POST['nama'] ?? '');
-    $email           = trim($_POST['email'] ?? '');
-    $telepon         = trim($_POST['telepon'] ?? '');
-    $password        = $_POST['password'] ?? '';
-    $konfirmasi      = $_POST['konfirmasi'] ?? '';
+    $nama_perusahaan = trim(htmlspecialchars($_POST['nama_perusahaan'] ?? ''));
+    $nama            = trim(htmlspecialchars($_POST['nama'] ?? ''));
+    $email           = trim(htmlspecialchars($_POST['email'] ?? ''));
+    $telepon         = trim(htmlspecialchars($_POST['telepon'] ?? ''));
+    $password        = htmlspecialchars($_POST['password'] ?? '');
+    $konfirmasi      = htmlspecialchars($_POST['konfirmasi'] ?? '');
 
     // Isian lama disimpan sebentar supaya form tidak kosong lagi kalau ada yang salah
     $_SESSION['isian_lama'] = [

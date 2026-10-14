@@ -21,10 +21,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // ---------- TAMBAH ----------
 if ($aksi === 'tambah') {
-    $nama        = trim($_POST['nama'] ?? '');
-    $email       = trim($_POST['email'] ?? '');
-    $password    = $_POST['password'] ?? '';
-    $konfirmasi  = $_POST['konfirmasi_password'] ?? '';
+    $nama        = trim(htmlspecialchars($_POST['nama'] ?? ''));
+    $email       = trim(htmlspecialchars($_POST['email'] ?? ''));
+    $password    = htmlspecialchars($_POST['password'] ?? '');
+    $konfirmasi  = htmlspecialchars($_POST['konfirmasi_password'] ?? '');
 
     // Simpan isian sementara supaya form tidak kosong lagi kalau ada yang salah
     $_SESSION['isian_petugas'] = ['nama' => $nama, 'email' => $email];

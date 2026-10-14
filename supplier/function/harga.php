@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $supplier_id  = (int) ($_SESSION['supplier_id'] ?? 0);
 $product_id   = (int) ($_POST['product_id'] ?? 0);
-$harga_satuan = $_POST['harga_satuan'] ?? '';
+$harga_satuan = html_entity_decode(htmlspecialchars($_POST['harga_satuan'] ?? ''));
 
 // Harga harus angka dan lebih dari 0
 if ($supplier_id <= 0 || $product_id <= 0 || !is_numeric($harga_satuan) || (float) $harga_satuan <= 0 || (float) $harga_satuan > 9999999999) {
