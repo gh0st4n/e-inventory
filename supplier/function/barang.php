@@ -23,6 +23,7 @@ $nama_barang  = trim(htmlspecialchars($_POST['nama_barang'] ?? ''));
 $harga_satuan = html_entity_decode(htmlspecialchars($_POST['harga_satuan'] ?? ''));
 
 // 1. Cek isian masuk akal (batas sesuai kolom di database)
+// supplier_id kurang dari sama dengan 0 dan nama_barang tidak ada isinya dan jumlah total panjang karakter lebih dari 150
 if ($supplier_id <= 0 || $nama_barang === '' || mb_strlen($nama_barang) > 150
     || !is_numeric($harga_satuan) || (float) $harga_satuan <= 0 || (float) $harga_satuan > 9999999999) {
     header("Location: $kembali?pesan=barang_tidak_valid#harga");

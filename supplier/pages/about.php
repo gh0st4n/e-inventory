@@ -38,7 +38,8 @@ $daftar_barang       ??= null;
               <label for="harga_baru" class="form-label">Harga Satuan</label>
               <div class="input-group">
                 <span class="input-group-text">Rp</span>
-                <input type="number" id="harga_baru" name="harga_satuan" class="form-control" min="1" max="9999999999" step="any" placeholder="0" required>
+                <!-- Bagian input disini, ada key min fungsinya menahan limit jumlah -->
+                <input type="number" id="harga_baru" name="harga_satuan" class="form-control" min="1000" max="9999999999" step="any" placeholder="0" required>
               </div>
             </div>
             <div class="col-md-3">

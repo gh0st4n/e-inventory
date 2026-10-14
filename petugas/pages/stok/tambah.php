@@ -32,7 +32,7 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
           <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
             <div class="">
               <h1 class="fs-3 mb-1">Catat Opname Stok</h1>
-              <p class="mb-0">Masukkan jumlah barang hasil hitung fisik di gudang</p>
+              <p class="mb-0">Masukkan jumlah barang hasil hitung fisik di gudang yang terindikasi rusak</p>
             </div>
             <div>
               <a href="index.php?page=stok" class="btn btn-primary">Kembali ke Stok &amp; Opname</a>
@@ -61,7 +61,7 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
                     </select>
                   </div>
                   <div class="col-md-3 mb-3">
-                    <label for="stok_fisik" class="form-label">Stok Fisik</label>
+                    <label for="stok_fisik" class="form-label">Stok Rusak</label>
                     <input type="number" class="form-control" name="stok_fisik" id="stok_fisik" placeholder="0" min="0" required>
                     <div class="form-text">Selisih dengan stok sistem dicatat otomatis.</div>
                   </div>
