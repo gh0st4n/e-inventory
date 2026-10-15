@@ -22,7 +22,6 @@ $nama_perusahaan     ??= '';
           <li><a href="#hero" class="active">Beranda</a></li>
           <li><a href="#ringkasan">Ringkasan</a></li>
           <li><a href="#harga">Penawaran Harga</a></li>
-          <li><a href="#status-po">Status PO</a></li>
           <li><a href="#riwayat-po">Riwayat PO</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>

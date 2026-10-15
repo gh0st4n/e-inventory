@@ -28,7 +28,6 @@ $nama_perusahaan     ??= '';
           <ul>
             <li><a href="#hero">Beranda</a></li>
             <li><a href="#harga">Penawaran Harga</a></li>
-            <li><a href="#status-po">Status PO</a></li>
             <li><a href="#riwayat-po">Riwayat PO</a></li>
           </ul>
         </div>

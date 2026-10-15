@@ -2,11 +2,11 @@
 include_once __DIR__ . '/../../database/connection.php';
 $koneksi = (new Database())->conn;
 
-// Barang yang dipilih dari tombol "Opname" di daftar stok (kalau ada)
+// Barang yang diopname dipilih dari tombol "Opname" di daftar stok, jadi namanya tidak bisa diganti di sini
 $barang_dipilih = (int) ($_GET['product_id'] ?? 0);
 
-// Daftar barang beserta stok sistem saat ini (stok = masuk - keluar + opname)
-$daftar_barang = $koneksi->query(
+// Ambil barang itu beserta stok sistem saat ini (stok = masuk - keluar + opname)
+$ambil_barang = $koneksi->prepare(
     "SELECT products.id, products.nama_barang,
             COALESCE(SUM(CASE stock_transactions.jenis_transaksi
                 WHEN 'masuk'  THEN stock_transactions.jumlah
@@ -15,9 +15,12 @@ $daftar_barang = $koneksi->query(
                 ELSE 0 END), 0) AS stok_saat_ini
      FROM products
      LEFT JOIN stock_transactions ON stock_transactions.product_id = products.id
-     GROUP BY products.id, products.nama_barang
-     ORDER BY products.nama_barang ASC"
+     WHERE products.id = ?
+     GROUP BY products.id, products.nama_barang"
 );
+$ambil_barang->bind_param('i', $barang_dipilih);
+$ambil_barang->execute();
+$barang = $ambil_barang->get_result()->fetch_assoc();
 
 $daftar_pesan = [
     'tidak_valid'      => 'Isian tidak valid, periksa kembali.',
@@ -47,18 +50,14 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
           <?php endif; ?>
           <div class="card">
             <div class="card-body p-4">
+              <?php if ($barang): ?>
               <form id="addProductForm" method="post" action="function/stok.php?aksi=simpan">
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <label for="product_id" class="form-label">Nama Barang</label>
-                    <select class="form-select" name="product_id" id="product_id" required>
-                      <option value="">Pilih barang</option>
-                      <?php while ($barang = $daftar_barang->fetch_assoc()): ?>
-                        <option value="<?= $barang['id'] ?>" <?= $barang['id'] == $barang_dipilih ? 'selected' : '' ?>>
-                          <?= htmlspecialchars($barang['nama_barang']) ?> (stok sistem: <?= (int) $barang['stok_saat_ini'] ?>)
-                        </option>
-                      <?php endwhile; ?>
-                    </select>
+                    <label for="nama_barang" class="form-label">Nama Barang</label>
+                    <input type="text" class="form-control" id="nama_barang" value="<?= htmlspecialchars($barang['nama_barang']) ?>" readonly>
+                    <input type="hidden" name="product_id" value="<?= (int) $barang['id'] ?>">
+                    <div class="form-text">Stok sistem saat ini: <?= (int) $barang['stok_saat_ini'] ?></div>
                   </div>
                   <div class="col-md-3 mb-3">
                     <label for="stok_fisik" class="form-label">Stok Rusak</label>
@@ -77,6 +76,12 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
                 </div>
 
               </form>
+              <?php else: ?>
+                <div class="text-center py-4">
+                  <p class="mb-3">Pilih barang lewat tombol Opname di daftar Stok &amp; Opname.</p>
+                  <a href="index.php?page=stok" class="btn btn-primary">Ke Stok &amp; Opname</a>
+                </div>
+              <?php endif; ?>
             </div>
           </div>
 

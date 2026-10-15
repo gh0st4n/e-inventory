@@ -2,6 +2,7 @@
 // petugas/function/barang-masuk.php
 
 include_once __DIR__ . '/../database/connection.php';
+include_once __DIR__ . '/supplier-ditolak.php';
 
 $koneksi = (new Database())->conn;
 
@@ -29,6 +30,12 @@ if ($aksi === 'simpan' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $cek_barang->execute();
     if ($cek_barang->get_result()->num_rows === 0) {
         header("Location: {$base}tambah-barang-masuk&pesan=barang_tidak_ada");
+        exit;
+    }
+
+    // Barang milik supplier yang ditolak manajer tidak boleh dicatat masuk
+    if (barangDariSupplierDitolak($koneksi, $product_id)) {
+        header("Location: {$base}tambah-barang-masuk&pesan=supplier_ditolak");
         exit;
     }
 
@@ -66,7 +73,17 @@ if ($aksi === 'ubah' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // 3. Simpan perubahan (hanya untuk transaksi jenis 'masuk')
+    // 3. Kalau barangnya diganti, barang baru tidak boleh milik supplier yang ditolak manajer
+    $ambil_lama = $koneksi->prepare("SELECT product_id FROM stock_transactions WHERE id = ? AND jenis_transaksi = 'masuk'");
+    $ambil_lama->bind_param('i', $id);
+    $ambil_lama->execute();
+    $data_lama = $ambil_lama->get_result()->fetch_assoc();
+    if ($data_lama && (int) $data_lama['product_id'] !== $product_id && barangDariSupplierDitolak($koneksi, $product_id)) {
+        header("Location: {$base}edit-barang-masuk&id=$id&pesan=supplier_ditolak");
+        exit;
+    }
+
+    // 4. Simpan perubahan (hanya untuk transaksi jenis 'masuk')
     try {
         $ubah = $koneksi->prepare(
             "UPDATE stock_transactions

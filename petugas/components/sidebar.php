@@ -10,6 +10,7 @@ function menuAktif($halaman_sekarang, $daftar_halaman)
   <aside id="sidebar" class="sidebar">
     <div class="logo-area">
      <a href="index.php?page=dashboard" class="d-inline-flex"><img src="template/src/assets/images/logo-icon.svg" alt="" width="24">
+        <span class="logo-text ms-2" style="font-size:22px;font-weight:700;line-height:1;color:#262626;">E-Inventory</span>
       </a>
     </div>
     <ul class="nav flex-column">

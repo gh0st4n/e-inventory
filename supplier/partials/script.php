@@ -12,7 +12,7 @@
   <script>
     (function () {
       var searchSaatIni = location.search;
-      var bagianDiganti = ['status-po', 'riwayat-po'];
+      var bagianDiganti = ['riwayat-po'];
 
       document.addEventListener('click', function (e) {
         var tautan = e.target.closest ? e.target.closest('a[href^="/"][href*="#riwayat-po"]') : null;

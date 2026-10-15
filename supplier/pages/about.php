@@ -16,7 +16,7 @@ $daftar_barang       ??= null;
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
         <h2>Penawaran Harga</h2>
-        <p>Tambahkan bahan baku yang Anda tawarkan dan perbarui harga satuannya untuk gudang</p>
+        <p>Tambahkan bahan baku yang Anda tawarkan, perbarui harga satuannya, atau hapus yang tidak sesuai</p>
       </div><!-- End Section Title -->
 
       <div class="container" data-aos="fade-up" data-aos-delay="100">
@@ -57,6 +57,7 @@ $daftar_barang       ??= null;
                   <th>Nama Barang</th>
                   <th>Harga Satuan Saat Ini</th>
                   <th style="width:340px">Ubah Harga</th>
+                  <th style="width:90px" class="text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -76,10 +77,16 @@ $daftar_barang       ??= null;
                           <button type="submit" class="btn btn-sm btn-simpan">Simpan</button>
                         </form>
                       </td>
+                      <td class="text-center">
+                        <form method="post" action="/supplier/function/hapus-barang.php" onsubmit="return confirm('Hapus bahan baku ini?\nData yang dihapus tidak bisa dikembalikan.');">
+                          <input type="hidden" name="product_id" value="<?= (int) $barang['id'] ?>">
+                          <button type="submit" class="btn btn-sm btn-hapus" title="Hapus bahan baku" aria-label="Hapus bahan baku <?= e($barang['nama_barang']) ?>"><i class="bi bi-trash"></i></button>
+                        </form>
+                      </td>
                     </tr>
                   <?php endwhile; ?>
                 <?php else: ?>
-                  <tr><td colspan="4" class="text-center text-secondary py-4">Belum ada bahan baku. Tambahkan bahan baku pertama Anda lewat formulir di atas.</td></tr>
+                  <tr><td colspan="5" class="text-center text-secondary py-4">Belum ada bahan baku. Tambahkan bahan baku pertama Anda lewat formulir di atas.</td></tr>
                 <?php endif; ?>
               </tbody>
             </table>

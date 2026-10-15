@@ -1,10 +1,13 @@
 <?php
 include_once __DIR__ . '/../../database/connection.php';
+include_once __DIR__ . '/../../function/supplier-ditolak.php';
 $koneksi = (new Database())->conn;
 
-// Daftar barang untuk pilihan "Nama Barang"
+// Daftar barang untuk pilihan "Nama Barang" (barang dari supplier yang ditolak manajer tidak ditampilkan)
 $daftar_barang = $koneksi->query(
-    "SELECT id, nama_barang FROM products ORDER BY nama_barang ASC"
+    "SELECT id, nama_barang FROM products
+     WHERE NOT (" . syaratSupplierDitolak() . ")
+     ORDER BY nama_barang ASC"
 );
 
 // Daftar PO untuk pilihan "Referensi PO" (hanya PO yang sudah disetujui / selesai)
@@ -20,6 +23,7 @@ $daftar_pesan = [
     'tidak_valid'      => 'Isian tidak valid, periksa kembali.',
     'barang_tidak_ada' => 'Barang yang dipilih tidak ditemukan.',
     'po_tidak_ada'     => 'PO yang dipilih tidak ditemukan.',
+    'supplier_ditolak' => 'Barang ini milik supplier yang ditolak manajer, jadi tidak bisa dicatat.',
 ];
 $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
 ?>

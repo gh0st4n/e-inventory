@@ -1,5 +1,6 @@
 <?php
 include_once __DIR__ . '/../../database/connection.php';
+include_once __DIR__ . '/../../function/supplier-ditolak.php';
 $koneksi = (new Database())->conn;
 
 // Daftar barang beserta stok saat ini (stok = masuk - keluar + opname)
@@ -12,6 +13,7 @@ $daftar_barang = $koneksi->query(
                 ELSE 0 END), 0) AS stok_saat_ini
      FROM products
      LEFT JOIN stock_transactions ON stock_transactions.product_id = products.id
+     WHERE NOT (" . syaratSupplierDitolak() . ")
      GROUP BY products.id, products.nama_barang
      ORDER BY products.nama_barang ASC"
 );
@@ -20,6 +22,7 @@ $daftar_pesan = [
     'tidak_valid'      => 'Isian tidak valid, periksa kembali.',
     'barang_tidak_ada' => 'Barang yang dipilih tidak ditemukan.',
     'stok_kurang'      => 'Stok barang tidak cukup untuk jumlah yang diminta.',
+    'supplier_ditolak' => 'Barang ini milik supplier yang ditolak manajer, jadi tidak bisa dicatat.',
 ];
 $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
 ?>

@@ -21,10 +21,6 @@
     <?php include 'supplier/pages/about.php' ?>
     <!-- /About Section -->
 
-    <!-- Services Section -->
-    <?php include 'supplier/pages/services.php' ?>
-    <!-- /Services Section -->
-
     <!-- Pricing Section -->
     <?php include 'supplier/pages/pricing.php' ?>
     <!-- /Pricing Section -->

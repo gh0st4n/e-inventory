@@ -2,6 +2,7 @@
 // petugas/function/barang-keluar.php
 
 include_once __DIR__ . '/../database/connection.php';
+include_once __DIR__ . '/supplier-ditolak.php';
 
 $koneksi = (new Database())->conn;
 
@@ -50,6 +51,12 @@ if ($aksi === 'simpan' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // Barang milik supplier yang ditolak manajer tidak boleh dikeluarkan lewat form ini
+    if (barangDariSupplierDitolak($koneksi, $product_id)) {
+        header("Location: {$base}tambah-barang-keluar&pesan=supplier_ditolak");
+        exit;
+    }
+
     // Cek stok cukup
     if ($jumlah > hitungStok($koneksi, $product_id)) {
         header("Location: {$base}tambah-barang-keluar&pesan=stok_kurang");
@@ -83,13 +90,23 @@ if ($aksi === 'ubah' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // 3. Cek stok cukup (transaksi ini sendiri tidak dihitung)
+    // 3. Kalau barangnya diganti, barang baru tidak boleh milik supplier yang ditolak manajer
+    $ambil_lama = $koneksi->prepare("SELECT product_id FROM stock_transactions WHERE id = ? AND jenis_transaksi = 'keluar'");
+    $ambil_lama->bind_param('i', $id);
+    $ambil_lama->execute();
+    $data_lama = $ambil_lama->get_result()->fetch_assoc();
+    if ($data_lama && (int) $data_lama['product_id'] !== $product_id && barangDariSupplierDitolak($koneksi, $product_id)) {
+        header("Location: {$base}edit-barang-keluar&id=$id&pesan=supplier_ditolak");
+        exit;
+    }
+
+    // 4. Cek stok cukup (transaksi ini sendiri tidak dihitung)
     if ($jumlah > hitungStok($koneksi, $product_id, $id)) {
         header("Location: {$base}edit-barang-keluar&id=$id&pesan=stok_kurang");
         exit;
     }
 
-    // 4. Simpan perubahan (hanya untuk transaksi jenis 'keluar')
+    // 5. Simpan perubahan (hanya untuk transaksi jenis 'keluar')
     $ubah = $koneksi->prepare(
         "UPDATE stock_transactions
          SET product_id = ?, jumlah = ?, tanggal = ?

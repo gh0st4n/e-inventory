@@ -30,7 +30,7 @@ $jumlah_po         ??= ['diajukan' => 0, 'disetujui' => 0, 'ditolak' => 0, 'sele
             <p>Tambahkan bahan baku, perbarui harga yang Anda tawarkan, dan pantau Purchase Order dari gudang dalam satu tempat.</p>
             <div class="d-flex flex-wrap gap-2">
               <a href="#harga" class="btn-get-started">Tambah / Ubah Harga</a>
-              <a href="#status-po" class="btn-outline-accent ms-0">Lihat Status PO</a>
+              <a href="#riwayat-po" class="btn-outline-accent ms-0">Lihat Riwayat PO</a>
             </div>
           </div>
 
