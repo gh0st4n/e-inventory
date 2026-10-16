@@ -4,6 +4,13 @@ $koneksi = (new Database())->conn;
 
 $id = (int) ($_GET['id'] ?? 0);
 
+// Asal daftar (status, pencarian, halaman) supaya tombol kembali ke daftar yang sama
+$status_asal   = $_GET['status'] ?? '';
+$ada_asal      = in_array($status_asal, ['semua', 'diajukan', 'disetujui', 'selesai', 'ditolak'], true);
+$query_kembali = $ada_asal
+    ? '&status=' . $status_asal . '&cari=' . urlencode(trim($_GET['cari'] ?? '')) . '&halaman=' . max(1, (int) ($_GET['halaman'] ?? 1))
+    : '';
+
 // ---------- DATA PO + SUPPLIER ----------
 $ambil_po = $koneksi->prepare(
     "SELECT purchase_orders.id, purchase_orders.tanggal_po, purchase_orders.status_po,
@@ -93,7 +100,7 @@ $warna = $warna_status_po[$purchase_order['status_po']] ?? 'secondary';
               <p class="mb-0">Periksa pengajuan ini sebelum diputuskan</p>
             </div>
             <div>
-              <a href="index.php?page=verifikasi-po" class="btn btn-primary">Kembali ke Verifikasi PO</a>
+              <a href="index.php?page=verifikasi-po<?= htmlspecialchars($query_kembali) ?>" class="btn btn-primary">Kembali ke Verifikasi PO</a>
             </div>
           </div>
         </div>
@@ -137,11 +144,13 @@ $warna = $warna_status_po[$purchase_order['status_po']] ?? 'secondary';
                   <form method="post" action="function/po.php?aksi=setujui" onsubmit="return confirm('Setujui <?= $kode_po ?>?')">
                     <input type="hidden" name="id" value="<?= $purchase_order['id'] ?>">
                     <input type="hidden" name="dari" value="detail">
+<input type="hidden" name="kembali" value="<?= htmlspecialchars($query_kembali) ?>">
                     <button type="submit" class="btn btn-success"><i class="ti ti-check me-1"></i>Setujui PO</button>
                   </form>
                   <form method="post" action="function/po.php?aksi=tolak" onsubmit="return confirm('Tolak <?= $kode_po ?>?')">
                     <input type="hidden" name="id" value="<?= $purchase_order['id'] ?>">
                     <input type="hidden" name="dari" value="detail">
+<input type="hidden" name="kembali" value="<?= htmlspecialchars($query_kembali) ?>">
                     <button type="submit" class="btn btn-outline-danger"><i class="ti ti-x me-1"></i>Tolak PO</button>
                   </form>
                 </div>
@@ -151,6 +160,7 @@ $warna = $warna_status_po[$purchase_order['status_po']] ?? 'secondary';
                 <form method="post" action="function/po.php?aksi=selesai" onsubmit="return confirm('Tandai <?= $kode_po ?> selesai?')">
                   <input type="hidden" name="id" value="<?= $purchase_order['id'] ?>">
                   <input type="hidden" name="dari" value="detail">
+<input type="hidden" name="kembali" value="<?= htmlspecialchars($query_kembali) ?>">
                   <button type="submit" class="btn btn-primary" <?= count($daftar_barang_diterima) === 0 ? 'disabled' : '' ?>>
                     <i class="ti ti-package me-1"></i>Tandai Selesai
                   </button>

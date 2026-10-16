@@ -1,15 +1,16 @@
 <?php
 include_once __DIR__ . '/../../database/connection.php';
-include_once __DIR__ . '/../../function/supplier-ditolak.php';
 $koneksi = (new Database())->conn;
 
 $id = (int) ($_GET['id'] ?? 0);
 
-// Ambil data barang keluar yang mau diubah
+// Ambil data barang keluar yang mau diubah (lengkap dengan nama barangnya)
 $ambil_data = $koneksi->prepare(
-    "SELECT id, product_id, jumlah, tanggal
+    "SELECT stock_transactions.id, stock_transactions.product_id, stock_transactions.jumlah,
+            stock_transactions.tanggal, products.nama_barang
      FROM stock_transactions
-     WHERE id = ? AND jenis_transaksi = 'keluar'"
+     INNER JOIN products ON products.id = stock_transactions.product_id
+     WHERE stock_transactions.id = ? AND stock_transactions.jenis_transaksi = 'keluar'"
 );
 $ambil_data->bind_param('i', $id);
 $ambil_data->execute();
@@ -21,25 +22,25 @@ if (!$data) {
     return;
 }
 
-// Daftar barang beserta stok saat ini (stok = masuk - keluar + opname)
-$daftar_barang = $koneksi->query(
-    "SELECT products.id, products.nama_barang,
-            COALESCE(SUM(CASE stock_transactions.jenis_transaksi
+// Stok yang tersedia untuk transaksi ini = stok barang tanpa transaksi ini sendiri
+// (stok = masuk - keluar + opname). Jumlah baru tidak boleh melebihi angka ini.
+$ambil_stok = $koneksi->prepare(
+    "SELECT COALESCE(SUM(CASE stock_transactions.jenis_transaksi
                 WHEN 'masuk'  THEN stock_transactions.jumlah
                 WHEN 'keluar' THEN -stock_transactions.jumlah
                 WHEN 'opname' THEN stock_transactions.jumlah
-                ELSE 0 END), 0) AS stok_saat_ini
-     FROM products
-     LEFT JOIN stock_transactions ON stock_transactions.product_id = products.id
-     WHERE NOT (" . syaratSupplierDitolak() . ") OR products.id = " . (int) $data['product_id'] . "
-     GROUP BY products.id, products.nama_barang
-     ORDER BY products.nama_barang ASC"
+                ELSE 0 END), 0) AS stok_tersedia
+     FROM stock_transactions
+     WHERE stock_transactions.product_id = ?
+       AND stock_transactions.id <> ?"
 );
+$ambil_stok->bind_param('ii', $data['product_id'], $id);
+$ambil_stok->execute();
+$stok_tersedia = max(0, (int) $ambil_stok->get_result()->fetch_assoc()['stok_tersedia']);
 
 $daftar_pesan = [
-    'tidak_valid' => 'Isian tidak valid, periksa kembali.',
+    'tidak_valid' => 'Jumlah tidak valid, periksa kembali.',
     'stok_kurang' => 'Stok barang tidak cukup untuk jumlah yang diminta.',
-    'supplier_ditolak' => 'Barang ini milik supplier yang ditolak manajer, jadi tidak bisa dipilih.',
 ];
 $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
 ?>
@@ -50,7 +51,7 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
           <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
             <div class="">
               <h1 class="fs-3 mb-1">Edit Barang Keluar</h1>
-              <p class="mb-0">Perbarui data barang yang keluar dari gudang</p>
+              <p class="mb-0">Perbarui jumlah barang yang keluar dari gudang</p>
             </div>
             <div>
               <a href="index.php?page=barang-keluar" class="btn btn-primary">Kembali ke Daftar Barang Keluar</a>
@@ -69,24 +70,20 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
                 <input type="hidden" name="id" value="<?= $data['id'] ?>">
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <label for="product_id" class="form-label">Nama Barang</label>
-                    <select class="form-select" name="product_id" id="product_id" required>
-                      <?php while ($barang = $daftar_barang->fetch_assoc()): ?>
-                        <option value="<?= $barang['id'] ?>" <?= $barang['id'] == $data['product_id'] ? 'selected' : '' ?>>
-                          <?= htmlspecialchars($barang['nama_barang']) ?> (stok: <?= (int) $barang['stok_saat_ini'] ?>)
-                        </option>
-                      <?php endwhile; ?>
-                    </select>
+                    <label for="nama_barang" class="form-label">Nama Barang</label>
+                    <input type="text" class="form-control" id="nama_barang" value="<?= htmlspecialchars($data['nama_barang']) ?>" disabled>
                   </div>
                   <div class="col-md-3 mb-3">
                     <label for="jumlah" class="form-label">Jumlah</label>
-                    <input type="number" class="form-control" name="jumlah" id="jumlah" min="1" value="<?= (int) $data['jumlah'] ?>" required>
+                    <input type="number" class="form-control" name="jumlah" id="jumlah" min="1" max="<?= max(1, $stok_tersedia) ?>" value="<?= (int) $data['jumlah'] ?>" required>
+                    <div class="form-text">Maksimal <?= $stok_tersedia ?> (stok yang tersedia).</div>
                   </div>
                   <div class="col-md-3 mb-3">
                     <label for="tanggal" class="form-label">Tanggal Keluar</label>
-                    <input type="date" class="form-control" name="tanggal" id="tanggal" value="<?= date('Y-m-d', strtotime($data['tanggal'])) ?>" required <?= date('Y-m-d', strtotime($data['tanggal'])) < date('Y-m-d') ? 'readonly' : 'min="' . date('Y-m-d') . '"' ?>>
+                    <input type="date" class="form-control" id="tanggal" value="<?= date('Y-m-d', strtotime($data['tanggal'])) ?>" disabled>
                   </div>
                 </div>
+                <p class="text-secondary small">Barang dan tanggal tidak dapat diubah. Hanya jumlah yang bisa diperbarui.</p>
 
                 <div class="d-flex gap-2">
                   <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
@@ -107,3 +104,14 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
       </div>
     </div>
   </main>
+
+  <script>
+    // Saat halaman dibuka, kursor langsung di BELAKANG angka pada kolom Jumlah
+    (function () {
+      var kolom_jumlah = document.getElementById('jumlah');
+      kolom_jumlah.focus();
+      var nilai = kolom_jumlah.value;
+      kolom_jumlah.value = '';
+      kolom_jumlah.value = nilai;
+    })();
+  </script>

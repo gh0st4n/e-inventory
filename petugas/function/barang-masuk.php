@@ -58,44 +58,56 @@ if ($aksi === 'simpan' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // ---------- UBAH ----------
+// Yang boleh diubah HANYA jumlah. Barang, referensi PO, dan tanggal tetap seperti saat data dibuat
+// (nilainya diambil dari database, bukan dari form).
 if ($aksi === 'ubah' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     // 1. Ambil data dari form
-    $id         = (int) ($_POST['id'] ?? 0);
-    $product_id = (int) ($_POST['product_id'] ?? 0);
-    $po_id      = ($_POST['po_id'] ?? '') !== '' ? (int) $_POST['po_id'] : null;
-    $jumlah     = (int) ($_POST['jumlah'] ?? 0);
-    $tanggal    = htmlspecialchars($_POST['tanggal'] ?? '');
+    $id     = (int) ($_POST['id'] ?? 0);
+    $jumlah = (int) ($_POST['jumlah'] ?? 0);
 
     // 2. Cek isiannya masuk akal
-    $tanggal_valid = DateTime::createFromFormat('Y-m-d', $tanggal);
-    if ($id <= 0 || $product_id <= 0 || $jumlah < 1 || !$tanggal_valid || $tanggal_valid->format('Y-m-d') !== $tanggal) {
+    if ($id <= 0 || $jumlah < 1) {
         header("Location: {$base}edit-barang-masuk&id=$id&pesan=tidak_valid");
         exit;
     }
 
-    // 3. Kalau barangnya diganti, barang baru tidak boleh milik supplier yang ditolak manajer
-    $ambil_lama = $koneksi->prepare("SELECT product_id FROM stock_transactions WHERE id = ? AND jenis_transaksi = 'masuk'");
-    $ambil_lama->bind_param('i', $id);
-    $ambil_lama->execute();
-    $data_lama = $ambil_lama->get_result()->fetch_assoc();
-    if ($data_lama && (int) $data_lama['product_id'] !== $product_id && barangDariSupplierDitolak($koneksi, $product_id)) {
-        header("Location: {$base}edit-barang-masuk&id=$id&pesan=supplier_ditolak");
+    // 3. Ambil barang dari data aslinya
+    $ambil_data = $koneksi->prepare(
+        "SELECT product_id FROM stock_transactions WHERE id = ? AND jenis_transaksi = 'masuk'"
+    );
+    $ambil_data->bind_param('i', $id);
+    $ambil_data->execute();
+    $data_lama = $ambil_data->get_result()->fetch_assoc();
+    if (!$data_lama) {
+        header("Location: $kembali");
         exit;
     }
 
-    // 4. Simpan perubahan (hanya untuk transaksi jenis 'masuk')
-    try {
-        $ubah = $koneksi->prepare(
-            "UPDATE stock_transactions
-             SET product_id = ?, po_id = ?, jumlah = ?, tanggal = ?
-             WHERE id = ? AND jenis_transaksi = 'masuk'"
-        );
-        $ubah->bind_param('iiisi', $product_id, $po_id, $jumlah, $tanggal, $id);
-        $ubah->execute();
-    } catch (mysqli_sql_exception $kesalahan) {
-        header("Location: {$base}edit-barang-masuk&id=$id&pesan=po_tidak_ada");
+    // 4. Stok tidak boleh jadi minus (sebagian barang ini mungkin sudah dikeluarkan)
+    $hitung_stok = $koneksi->prepare(
+        "SELECT COALESCE(SUM(CASE stock_transactions.jenis_transaksi
+                    WHEN 'masuk'  THEN stock_transactions.jumlah
+                    WHEN 'keluar' THEN -stock_transactions.jumlah
+                    WHEN 'opname' THEN stock_transactions.jumlah
+                    ELSE 0 END), 0) AS stok_lain
+         FROM stock_transactions
+         WHERE stock_transactions.product_id = ?
+           AND stock_transactions.id <> ?"
+    );
+    $hitung_stok->bind_param('ii', $data_lama['product_id'], $id);
+    $hitung_stok->execute();
+    $stok_lain = (int) $hitung_stok->get_result()->fetch_assoc()['stok_lain'];
+    if ($stok_lain + $jumlah < 0) {
+        header("Location: {$base}edit-barang-masuk&id=$id&pesan=stok_minus");
         exit;
     }
+
+    // 5. Simpan perubahan (hanya kolom jumlah)
+    $ubah = $koneksi->prepare(
+        "UPDATE stock_transactions SET jumlah = ? WHERE id = ? AND jenis_transaksi = 'masuk'"
+    );
+    $ubah->bind_param('ii', $jumlah, $id);
+    $ubah->execute();
 
     header("Location: $kembali&pesan=update_ok");
     exit;

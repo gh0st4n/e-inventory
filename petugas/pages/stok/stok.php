@@ -1,5 +1,6 @@
 <?php
 include_once __DIR__ . '/../../database/connection.php';
+include_once __DIR__ . '/../../function/supplier-ditolak.php';
 $koneksi = (new Database())->conn;
 
 // ---------- PESAN (setelah catat / ubah / hapus opname) ----------
@@ -38,11 +39,13 @@ $query_data = "SELECT products.id, products.nama_barang, products.stok_minimal, 
                           WHEN 'masuk'  THEN stock_transactions.jumlah
                           WHEN 'keluar' THEN -stock_transactions.jumlah
                           WHEN 'opname' THEN stock_transactions.jumlah
-                          ELSE 0 END), 0) AS stok_saat_ini
+                          ELSE 0 END), 0) AS stok_saat_ini,
+                      " . syaratSupplierDitolak() . " AS supplier_ditolak,
+                      (CASE WHEN " . syaratPoTerverifikasi() . " THEN 1 ELSE 0 END) AS po_terverifikasi
                FROM products
                LEFT JOIN stock_transactions ON stock_transactions.product_id = products.id"
                . $kondisi_cari . "
-               GROUP BY products.id, products.nama_barang, products.stok_minimal, products.harga_satuan
+               GROUP BY products.id, products.nama_barang, products.stok_minimal, products.harga_satuan, products.supplier_id
                ORDER BY products.nama_barang ASC
                LIMIT ? OFFSET ?";
 $statement_data = $koneksi->prepare($query_data);
@@ -159,7 +162,19 @@ function linkHalaman($nomor_halaman, $kata_cari)
                     <td>Rp <?= number_format($barang['harga_satuan'], 0, ',', '.') ?></td>
                     <td><span class="badge bg-<?= $warna_status ?>-subtle text-<?= $warna_status ?>"><?= $label_status ?></span></td>
                     <td class="">
-                      <a href="index.php?page=tambah-opname&product_id=<?= $barang['id'] ?>" class="btn btn-sm btn-outline-primary">Opname</a>
+                      <?php if ((int) $barang['supplier_ditolak'] === 1): ?>
+                        <span class="d-inline-block" title="Supplier barang ini ditolak manajer, opname tidak bisa dicatat">
+                          <button type="button" class="btn btn-sm btn-outline-secondary" disabled style="pointer-events:none;">Opname</button>
+                        </span>
+                        <div class="small text-danger mt-1">PO ditolak manajer</div>
+                      <?php elseif ((int) $barang['po_terverifikasi'] !== 1): ?>
+                        <span class="d-inline-block" title="Belum ada PO yang disetujui manajer, opname belum bisa dicatat">
+                          <button type="button" class="btn btn-sm btn-outline-secondary" disabled style="pointer-events:none;">Opname</button>
+                        </span>
+                        <div class="small text-secondary mt-1">Belum ada PO disetujui</div>
+                      <?php else: ?>
+                        <a href="index.php?page=tambah-opname&product_id=<?= $barang['id'] ?>" class="btn btn-sm btn-outline-primary">Opname</a>
+                      <?php endif; ?>
                     </td>
                   </tr>
                 <?php endwhile; ?>

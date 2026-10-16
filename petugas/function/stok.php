@@ -5,6 +5,7 @@
 
 include_once __DIR__ . '/../login/cek-login.php';
 include_once __DIR__ . '/../database/connection.php';
+include_once __DIR__ . '/supplier-ditolak.php';
 
 $koneksi = (new Database())->conn;
 
@@ -73,6 +74,12 @@ if ($aksi === 'simpan' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // Opname hanya untuk barang dari supplier yang PO-nya sudah disetujui manajer dan tidak ditolak
+    if (alasanTidakBisaOpname($koneksi, $product_id) !== null) {
+        header("Location: {$base}tambah-opname&product_id=$product_id");
+        exit;
+    }
+
     // Selisih = stok fisik hasil hitung - stok menurut sistem
     $selisih = $stok_fisik - hitungStok($koneksi, $product_id);
 
@@ -114,10 +121,16 @@ if ($aksi === 'ubah' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // 4. Hitung ulang selisih (opname ini sendiri tidak dihitung sebagai stok sistem)
+    // 4. Barangnya harus tetap memenuhi syarat opname (PO disetujui manajer dan tidak ditolak)
+    if (alasanTidakBisaOpname($koneksi, (int) $opname['product_id']) !== null) {
+        header("Location: {$base}edit-opname&id=$id");
+        exit;
+    }
+
+    // 5. Hitung ulang selisih (opname ini sendiri tidak dihitung sebagai stok sistem)
     $selisih = $stok_fisik - hitungStok($koneksi, (int) $opname['product_id'], $id);
 
-    // 5. Simpan perubahan
+    // 6. Simpan perubahan
     $ubah = $koneksi->prepare(
         "UPDATE stock_transactions
          SET jumlah = ?, tanggal = ?

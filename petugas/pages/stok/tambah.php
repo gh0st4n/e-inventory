@@ -1,5 +1,6 @@
 <?php
 include_once __DIR__ . '/../../database/connection.php';
+include_once __DIR__ . '/../../function/supplier-ditolak.php';
 $koneksi = (new Database())->conn;
 
 // Barang yang diopname dipilih dari tombol "Opname" di daftar stok, jadi namanya tidak bisa diganti di sini
@@ -21,6 +22,10 @@ $ambil_barang = $koneksi->prepare(
 $ambil_barang->bind_param('i', $barang_dipilih);
 $ambil_barang->execute();
 $barang = $ambil_barang->get_result()->fetch_assoc();
+
+// Opname hanya boleh untuk barang dari supplier yang PO-nya sudah disetujui/selesai dan tidak ditolak manajer
+$alasan_tidak_bisa = $barang ? alasanTidakBisaOpname($koneksi, (int) $barang['id']) : null;
+$bisa_opname       = $barang && $alasan_tidak_bisa === null;
 
 $daftar_pesan = [
     'tidak_valid'      => 'Isian tidak valid, periksa kembali.',
@@ -50,7 +55,7 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
           <?php endif; ?>
           <div class="card">
             <div class="card-body p-4">
-              <?php if ($barang): ?>
+              <?php if ($bisa_opname): ?>
               <form id="addProductForm" method="post" action="function/stok.php?aksi=simpan">
                 <div class="row">
                   <div class="col-md-6 mb-3">
@@ -78,7 +83,13 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
               </form>
               <?php else: ?>
                 <div class="text-center py-4">
-                  <p class="mb-3">Pilih barang lewat tombol Opname di daftar Stok &amp; Opname.</p>
+                  <?php if ($alasan_tidak_bisa === 'ditolak'): ?>
+                    <p class="mb-3 text-danger">Barang ini milik supplier yang PO-nya ditolak manajer, jadi opname tidak bisa dicatat.</p>
+                  <?php elseif ($alasan_tidak_bisa === 'belum_po'): ?>
+                    <p class="mb-3 text-danger">Barang ini belum bisa diopname. Ajukan kebutuhan bahan baku ke supplier dan tunggu PO disetujui manajer terlebih dahulu.</p>
+                  <?php else: ?>
+                    <p class="mb-3">Pilih barang lewat tombol Opname di daftar Stok &amp; Opname.</p>
+                  <?php endif; ?>
                   <a href="index.php?page=stok" class="btn btn-primary">Ke Stok &amp; Opname</a>
                 </div>
               <?php endif; ?>

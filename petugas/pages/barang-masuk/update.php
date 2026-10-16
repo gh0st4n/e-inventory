@@ -1,15 +1,18 @@
 <?php
 include_once __DIR__ . '/../../database/connection.php';
-include_once __DIR__ . '/../../function/supplier-ditolak.php';
 $koneksi = (new Database())->conn;
 
 $id = (int) ($_GET['id'] ?? 0);
 
-// Ambil data barang masuk yang mau diubah
+// Ambil data barang masuk yang mau diubah (lengkap dengan nama barang dan PO-nya)
 $ambil_data = $koneksi->prepare(
-    "SELECT id, product_id, po_id, jumlah, tanggal
+    "SELECT stock_transactions.id, stock_transactions.po_id, stock_transactions.jumlah, stock_transactions.tanggal,
+            products.nama_barang, suppliers.nama_perusahaan
      FROM stock_transactions
-     WHERE id = ? AND jenis_transaksi = 'masuk'"
+     INNER JOIN products ON products.id = stock_transactions.product_id
+     LEFT JOIN purchase_orders ON purchase_orders.id = stock_transactions.po_id
+     LEFT JOIN suppliers ON suppliers.id = purchase_orders.supplier_id
+     WHERE stock_transactions.id = ? AND stock_transactions.jenis_transaksi = 'masuk'"
 );
 $ambil_data->bind_param('i', $id);
 $ambil_data->execute();
@@ -21,33 +24,14 @@ if (!$data) {
     return;
 }
 
-// Daftar barang untuk pilihan "Nama Barang"
-// (barang dari supplier yang ditolak manajer disembunyikan, kecuali barang yang sedang dipakai data ini)
-$barang_saat_ini = (int) $data['product_id'];
-$daftar_barang = $koneksi->query(
-    "SELECT id, nama_barang FROM products
-     WHERE NOT (" . syaratSupplierDitolak() . ") OR products.id = $barang_saat_ini
-     ORDER BY nama_barang ASC"
-);
-
-// Daftar PO untuk pilihan "Referensi PO" (PO yang sedang dipakai data ini tetap ditampilkan)
-$po_saat_ini = (int) ($data['po_id'] ?? 0);
-$ambil_purchase_order = $koneksi->prepare(
-    "SELECT purchase_orders.id, suppliers.nama_perusahaan
-     FROM purchase_orders
-     INNER JOIN suppliers ON suppliers.id = purchase_orders.supplier_id
-     WHERE purchase_orders.status_po IN ('disetujui', 'selesai')
-        OR purchase_orders.id = ?
-     ORDER BY purchase_orders.id DESC"
-);
-$ambil_purchase_order->bind_param('i', $po_saat_ini);
-$ambil_purchase_order->execute();
-$daftar_purchase_order = $ambil_purchase_order->get_result();
+// Tulisan referensi PO yang ditampilkan (tidak bisa diubah)
+$teks_po = $data['po_id']
+    ? 'PO-' . str_pad($data['po_id'], 4, '0', STR_PAD_LEFT) . ' - ' . $data['nama_perusahaan']
+    : 'Tanpa PO';
 
 $daftar_pesan = [
-    'tidak_valid'  => 'Isian tidak valid, periksa kembali.',
-    'po_tidak_ada' => 'PO yang dipilih tidak ditemukan.',
-    'supplier_ditolak' => 'Barang ini milik supplier yang ditolak manajer, jadi tidak bisa dipilih.',
+    'tidak_valid' => 'Jumlah tidak valid, periksa kembali.',
+    'stok_minus'  => 'Jumlah terlalu kecil: sebagian barang ini sudah dikeluarkan, jadi stok akan menjadi minus.',
 ];
 $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
 ?>
@@ -58,7 +42,7 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
           <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
             <div class="">
               <h1 class="fs-3 mb-1">Edit Barang Masuk</h1>
-              <p class="mb-0">Perbarui data barang yang masuk ke gudang</p>
+              <p class="mb-0">Perbarui jumlah barang yang masuk ke gudang</p>
             </div>
             <div>
               <a href="index.php?page=barang-masuk" class="btn btn-primary">Kembali ke Daftar Barang Masuk</a>
@@ -77,25 +61,12 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
                 <input type="hidden" name="id" value="<?= $data['id'] ?>">
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <label for="product_id" class="form-label">Nama Barang</label>
-                    <select class="form-select" name="product_id" id="product_id" required>
-                      <?php while ($barang = $daftar_barang->fetch_assoc()): ?>
-                        <option value="<?= $barang['id'] ?>" <?= $barang['id'] == $data['product_id'] ? 'selected' : '' ?>>
-                          <?= htmlspecialchars($barang['nama_barang']) ?>
-                        </option>
-                      <?php endwhile; ?>
-                    </select>
+                    <label for="nama_barang" class="form-label">Nama Barang</label>
+                    <input type="text" class="form-control" id="nama_barang" value="<?= htmlspecialchars($data['nama_barang']) ?>" disabled>
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label for="po_id" class="form-label">Referensi PO (opsional)</label>
-                    <select class="form-select" name="po_id" id="po_id">
-                      <option value="">Tanpa PO</option>
-                      <?php while ($purchase_order = $daftar_purchase_order->fetch_assoc()): ?>
-                        <option value="<?= $purchase_order['id'] ?>" <?= $purchase_order['id'] == $data['po_id'] ? 'selected' : '' ?>>
-                          PO-<?= str_pad($purchase_order['id'], 4, '0', STR_PAD_LEFT) ?> - <?= htmlspecialchars($purchase_order['nama_perusahaan']) ?>
-                        </option>
-                      <?php endwhile; ?>
-                    </select>
+                    <label for="teks_po" class="form-label">Referensi PO</label>
+                    <input type="text" class="form-control" id="teks_po" value="<?= htmlspecialchars($teks_po) ?>" disabled>
                   </div>
                 </div>
                 <div class="row">
@@ -105,9 +76,10 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
                   </div>
                   <div class="col-md-6 mb-3">
                     <label for="tanggal" class="form-label">Tanggal Masuk</label>
-                    <input type="date" class="form-control" name="tanggal" id="tanggal" value="<?= date('Y-m-d', strtotime($data['tanggal'])) ?>" required <?= date('Y-m-d', strtotime($data['tanggal'])) < date('Y-m-d') ? 'readonly' : 'min="' . date('Y-m-d') . '"' ?>>
+                    <input type="date" class="form-control" id="tanggal" value="<?= date('Y-m-d', strtotime($data['tanggal'])) ?>" disabled>
                   </div>
                 </div>
+                <p class="text-secondary small">Barang, referensi PO, dan tanggal tidak dapat diubah. Hanya jumlah yang bisa diperbarui.</p>
 
                 <div class="d-flex gap-2">
                   <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
@@ -128,3 +100,14 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
       </div>
     </div>
   </main>
+
+  <script>
+    // Saat halaman dibuka, kursor langsung di BELAKANG angka pada kolom Jumlah
+    (function () {
+      var kolom_jumlah = document.getElementById('jumlah');
+      kolom_jumlah.focus();
+      var nilai = kolom_jumlah.value;
+      kolom_jumlah.value = '';
+      kolom_jumlah.value = nilai;
+    })();
+  </script>

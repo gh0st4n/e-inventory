@@ -22,11 +22,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $id   = (int) ($_POST['id'] ?? 0);
 $dari = htmlspecialchars($_POST['dari'] ?? 'daftar');
 
+// Asal daftar (status, pencarian, halaman) dari halaman detail; hanya format yang dikenal yang diterima
+$kembali = $_POST['kembali'] ?? '';
+if (!preg_match('/^&status=(semua|diajukan|disetujui|selesai|ditolak)&cari=[^&<>"\']*&halaman=\d+$/', $kembali)) {
+    $kembali = '';
+}
+
 // Tentukan halaman tujuan setelah proses selesai (kembali ke halaman asal tombol)
 function tujuan($base, $dari, $id, $pesan)
 {
+    global $kembali;
     if ($dari === 'detail') {
-        return "{$base}detail-po&id=$id&pesan=$pesan";
+        return "{$base}detail-po&id=$id&pesan=$pesan" . $kembali;
     }
     if ($dari === 'dashboard') {
         return "{$base}dashboard&pesan=$pesan";

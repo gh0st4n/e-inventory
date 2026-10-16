@@ -161,7 +161,7 @@ function linkHalaman($nomor_halaman, $status_dipilih, $kata_cari)
                     <td><?= date('d M Y', strtotime($purchase_order['tanggal_po'])) ?></td>
                     <td><span class="badge bg-<?= $warna ?>-subtle text-<?= $warna ?>"><?= ucfirst($purchase_order['status_po']) ?></span></td>
                     <td>
-                      <a href="index.php?page=detail-po&id=<?= $purchase_order['id'] ?>" class="btn btn-sm btn-outline-secondary">Detail</a>
+                      <a href="index.php?page=detail-po&id=<?= $purchase_order['id'] ?>&status=<?= $status_dipilih ?>&cari=<?= urlencode($kata_cari) ?>&halaman=<?= $halaman_aktif ?>" class="btn btn-sm btn-outline-secondary">Detail</a>
                       <?php if ($purchase_order['status_po'] === 'diajukan'): ?>
                         <form method="post" action="function/po.php?aksi=setujui" class="d-inline" onsubmit="return confirm('Setujui <?= $kode_po ?>?')">
                           <input type="hidden" name="id" value="<?= $purchase_order['id'] ?>">

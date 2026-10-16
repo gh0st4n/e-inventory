@@ -1,5 +1,6 @@
 <?php
 include_once __DIR__ . '/../../database/connection.php';
+include_once __DIR__ . '/../../function/supplier-ditolak.php';
 $koneksi = (new Database())->conn;
 
 $id = (int) ($_GET['id'] ?? 0);
@@ -21,6 +22,11 @@ if (!$data) {
     echo "<script>window.location.href='index.php?page=stok'</script>";
     return;
 }
+
+// Opname hanya boleh diubah kalau barangnya masih memenuhi syarat: PO supplier sudah disetujui/selesai dan tidak ditolak
+// (kalau tidak memenuhi, datanya hanya bisa dihapus)
+$alasan_tidak_bisa = alasanTidakBisaOpname($koneksi, (int) $data['product_id']);
+$tidak_bisa_opname = $alasan_tidak_bisa !== null;
 
 // Stok sistem tanpa opname ini, lalu stok fisik saat opname dicatat = stok sistem + selisih
 $ambil_stok = $koneksi->prepare(
@@ -64,6 +70,7 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
           <?php endif; ?>
           <div class="card">
             <div class="card-body p-4">
+              <?php if (!$tidak_bisa_opname): ?>
               <form method="post" action="function/stok.php?aksi=ubah">
                 <input type="hidden" name="id" value="<?= $data['id'] ?>">
                 <div class="row">
@@ -87,6 +94,14 @@ $pesan = $daftar_pesan[$_GET['pesan'] ?? ''] ?? '';
                   <a href="index.php?page=stok" class="btn btn-secondary">Batal</a>
                 </div>
               </form>
+              <?php else: ?>
+                <div class="text-center py-4">
+                  <p class="mb-3 text-danger"><?= $alasan_tidak_bisa === 'ditolak'
+                    ? 'Barang ini milik supplier yang PO-nya ditolak manajer, jadi opname tidak bisa dicatat.'
+                    : 'Barang ini belum punya PO yang disetujui manajer, jadi opname tidak bisa dicatat.' ?> Data opname ini hanya bisa dihapus dari daftar Stok &amp; Opname.</p>
+                  <a href="index.php?page=stok" class="btn btn-primary">Kembali ke Stok &amp; Opname</a>
+                </div>
+              <?php endif; ?>
             </div>
           </div>
         </div>
