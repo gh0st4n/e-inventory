@@ -2315,3 +2315,16 @@ section,
   background: #dc3545;
   border-color: #dc3545;
 }
+
+/* Sembunyikan scrollbar halaman di sisi kanan (halaman tetap bisa di-scroll dengan mouse, touchpad, layar sentuh, atau keyboard) */
+html {
+  scrollbar-width: none; /* Firefox dan Chrome terbaru */
+  -ms-overflow-style: none; /* Edge lama */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Edge, Safari */
+  width: 0;
+  height: 0;
+}
